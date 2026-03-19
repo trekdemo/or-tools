@@ -1274,7 +1274,12 @@ bool IsFree(std::shared_ptr<T> expr) {
 #else
 template <class T>
 bool IsFree(std::shared_ptr<T> expr) {
-  return Py_REFCNT(py::cast(expr).ptr()) == 4;
+  PyObject* op = py::cast(expr).ptr();
+#if PY_VERSION_HEX >= 0x030D0000
+  return Py_REFCNT(op) == 2;
+#else
+  return Py_REFCNT(op) == 4;
+#endif
 }
 #endif
 
