@@ -229,8 +229,8 @@ if(BUILD_PYTHON)
     FetchContent_Declare(
       pybind11
       GIT_REPOSITORY "https://github.com/pybind/pybind11.git"
-      #GIT_TAG "v3.0.2" # 2026/02/17
-      GIT_TAG "v3.0.1" # 2025/08/22
+      GIT_TAG "v3.0.2" # 2026/02/17
+      #GIT_TAG "v3.0.1" # 2025/08/22
       GIT_SHALLOW TRUE
       UPDATE_COMMAND git reset --hard
       SYSTEM
