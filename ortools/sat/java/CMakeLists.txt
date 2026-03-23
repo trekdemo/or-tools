@@ -83,6 +83,7 @@ target_link_libraries(jnicp_model_proto PRIVATE ortools::util_java_jni_helper)
 target_link_libraries(jni${JAVA_ARTIFACT} PRIVATE jnicp_model_proto)
 
 # sat
+set(SWIG_MODULE_jnisat_EXTRA_DEPS java_cp_model_proto)
 swig_add_library(jnisat
   TYPE OBJECT
   LANGUAGE java
@@ -97,7 +98,6 @@ set_target_properties(jnisat PROPERTIES
   SWIG_USE_TARGET_INCLUDE_DIRECTORIES ON
   POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(jnisat PRIVATE ortools::ortools)
-add_dependencies(jnisat jnicp_model_proto)
 
 if(BUILD_TESTING)
   file(GLOB JAVA_SRCS "*Test.java")
