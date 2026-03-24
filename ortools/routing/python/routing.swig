@@ -16,7 +16,6 @@
 
 %include "ortools/base/base.i"
 %include "ortools/util/python/proto.i"
-%include "strings/strings.swig"
 
 // PY_CONVERT_HELPER_* macros.
 %include "ortools/constraint_solver/python/constraint_solver_helpers.swig"
