@@ -11,6 +11,7 @@ ENTRYPOINT ["/bin/sh", "-c"]
 CMD ["/bin/sh"]
 
 WORKDIR /root
-ADD or-tools_amd64_alpine-edge_cpp_v*.tar.gz .
+ARG TARGETARCH=amd64
+ADD or-tools_${TARGETARCH}_alpine-edge_cpp_v*.tar.gz .
 
 RUN cd or-tools_*_v* && make test
