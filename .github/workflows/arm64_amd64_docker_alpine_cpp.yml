@@ -1,0 +1,37 @@
+# ref: https://github.com/docker-library/official-images
+name: amd64/arm64 Docker Alpine C++
+
+on:
+  push:
+    branches:
+      - main
+      - v99bugfix
+  workflow_dispatch:
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  alpine-cpp:
+    strategy:
+      matrix:
+        platform: [amd64, arm64]
+      fail-fast: false
+    name: ${{matrix.platform}}•alpine-edge•C++
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and export archive
+        run: make --directory=tools/docker ${{matrix.platform}}_alpine-edge_cpp_export
+      - name: Test archive
+        run: make --directory=tools/docker ${{matrix.platform}}_alpine-edge_cpp_test
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: or-tools_${{matrix.platform}}_alpine-edge_cpp
+          path: tools/docker/export/archives/*.tar.gz
