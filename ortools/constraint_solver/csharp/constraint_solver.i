@@ -20,11 +20,17 @@ using System.Collections;
 using System.Collections.Generic;
 %}
 
-%include "ortools/base/base.i"
 %include "enumsimple.swg"
+
+%include "ortools/base/base.i"
 %import "ortools/util/csharp/absl_string_view.i"
 %import "ortools/util/csharp/vector.i"
 %import "ortools/util/csharp/proto.i"
+
+// Remove swig warnings
+#pragma SWIG nowarn=473
+// Explicit template instantiation ignored
+#pragma SWIG nowarn=320
 
 // We need to forward-declare the proto here, so that PROTO_INPUT involving it
 // works correctly. The order matters very much: this declaration needs to be
@@ -36,22 +42,10 @@ class RegularLimitParameters;
 
 %module(directors="1") ConstraintSolverGlobals;
 
-// Remove swig warnings
-#pragma SWIG nowarn=473
-// Explicit template instantiation ignored
-#pragma SWIG nowarn=320
-
+// Include the files we want to wrap a first time.
 %{
-#include <setjmp.h>
-
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <functional>
-
 #include "ortools/base/base_export.h"
 #include "ortools/constraint_solver/reversible_engine.h"
-#include "ortools/constraint_solver/reversible_data.h"
 #include "ortools/constraint_solver/constraint_solver.h"
 #include "ortools/constraint_solver/assignment.h"
 #include "ortools/constraint_solver/interval.h"
@@ -59,18 +53,11 @@ class RegularLimitParameters;
 #include "ortools/constraint_solver/search.h"
 #include "ortools/constraint_solver/sequence_var.h"
 #include "ortools/constraint_solver/variables.h"
-
 #include "ortools/constraint_solver/search_limit.pb.h"
 #include "ortools/constraint_solver/solver_parameters.pb.h"
 
-namespace operations_research {
-class LocalSearchPhaseParameters {
- public:
-  LocalSearchPhaseParameters() {}
-  ~LocalSearchPhaseParameters() {}
-};
-}  // namespace operations_research
-
+// Supporting structure for the PROTECT_FROM_FAILURE macro.
+#include <setjmp.h>
 struct FailureProtect {
   jmp_buf exception_buffer;
   void JumpBack() {
@@ -143,7 +130,10 @@ PROTECT_FROM_FAILURE(Solver::Fail(), arg1);
 
 // ############ END DUPLICATED CODE BLOCK ############
 
+// Use to correctly wrap Solver::MakeScheduleOrPostpone.
 %apply int64_t * INOUT { int64_t * marker };
+// Use to correctly wrap arguments otherwise SWIG will wrap them as
+// SWIGTYPE_p_long_long opaque pointer.
 %apply int64_t * OUTPUT { int64_t *l, int64_t *u, int64_t *value };
 
 %include "ortools/util/csharp/tuple_set.i"
@@ -262,9 +252,49 @@ namespace operations_research {
 // Methods:
 %rename (NextWrapper) DecisionBuilder::Next;
 
+// DecisionVisitor
+%feature("director") DecisionVisitor;
+%unignore DecisionVisitor;
+
+// ModelVisitor
+%unignore ModelVisitor;
+
 // SymmetryBreaker
 %feature("director") SymmetryBreaker;
 %unignore SymmetryBreaker;
+
+// ModelCache
+%unignore ModelCache;
+%unignore ModelCache::Clear;
+%unignore ModelCache::FindExprConstantExpression;
+%unignore ModelCache::FindExprExprConstantExpression;
+%unignore ModelCache::FindExprExprConstraint;
+%unignore ModelCache::FindExprExpression;
+%unignore ModelCache::FindExprExprExpression;
+%unignore ModelCache::FindVarArrayConstantArrayExpression;
+%unignore ModelCache::FindVarArrayConstantExpression;
+%unignore ModelCache::FindVarArrayExpression;
+%unignore ModelCache::FindVarConstantArrayExpression;
+%unignore ModelCache::FindVarConstantConstantConstraint;
+%unignore ModelCache::FindVarConstantConstantExpression;
+%unignore ModelCache::FindVarConstantConstraint;
+%unignore ModelCache::FindVoidConstraint;
+%unignore ModelCache::InsertExprConstantExpression;
+%unignore ModelCache::InsertExprExprConstantExpression;
+%unignore ModelCache::InsertExprExprConstraint;
+%unignore ModelCache::InsertExprExpression;
+%unignore ModelCache::InsertExprExprExpression;
+%unignore ModelCache::InsertVarArrayConstantArrayExpression;
+%unignore ModelCache::InsertVarArrayConstantExpression;
+%unignore ModelCache::InsertVarArrayExpression;
+%unignore ModelCache::InsertVarConstantArrayExpression;
+%unignore ModelCache::InsertVarConstantConstantConstraint;
+%unignore ModelCache::InsertVarConstantConstantExpression;
+%unignore ModelCache::InsertVarConstantConstraint;
+%unignore ModelCache::InsertVoidConstraint;
+
+// RevPartialSequence
+%unignore RevPartialSequence;
 
 // UnsortedNullableRevBitset
 %ignore UnsortedNullableRevBitset;
@@ -307,12 +337,17 @@ namespace operations_research {
 %ignore SequenceVarElement::LoadFromProto;
 %ignore SequenceVarElement::WriteToProto;
 
-// ModelVisitor
-%unignore ModelVisitor;
-
 // SolutionCollector
 %feature("director") SolutionCollector;
 %unignore SolutionCollector;
+
+// SolutionPool
+%feature("director") SolutionPool;
+%unignore SolutionPool;
+%unignore SolutionPool::GetNextSolution;
+%unignore SolutionPool::Initialize;
+%unignore SolutionPool::RegisterNewSolution;
+%unignore SolutionPool::SyncNeeded;
 
 // Solver
 %unignore Solver;
@@ -415,6 +450,7 @@ namespace operations_research {
 %ignore Solver::SearchContext;
 %ignore Solver::MakeSearchLog(SearchLogParameters parameters);
 %ignore Solver::MakeIntVarArray;
+%ignore Solver::MakeIntervalVarArray;
 %ignore Solver::MakeBoolVarArray;
 %ignore Solver::MakeFixedDurationIntervalVarArray;
 %ignore Solver::SetBranchSelector;
@@ -681,36 +717,6 @@ namespace operations_research {
 // Methods:
 %rename (SequenceVar) DisjunctiveConstraint::MakeSequenceVar;
 
-// ModelCache
-%unignore ModelCache;
-%unignore ModelCache::Clear;
-%unignore ModelCache::FindExprConstantExpression;
-%unignore ModelCache::FindExprExprConstantExpression;
-%unignore ModelCache::FindExprExprConstraint;
-%unignore ModelCache::FindExprExpression;
-%unignore ModelCache::FindExprExprExpression;
-%unignore ModelCache::FindVarArrayConstantArrayExpression;
-%unignore ModelCache::FindVarArrayConstantExpression;
-%unignore ModelCache::FindVarArrayExpression;
-%unignore ModelCache::FindVarConstantArrayExpression;
-%unignore ModelCache::FindVarConstantConstantConstraint;
-%unignore ModelCache::FindVarConstantConstantExpression;
-%unignore ModelCache::FindVarConstantConstraint;
-%unignore ModelCache::FindVoidConstraint;
-%unignore ModelCache::InsertExprConstantExpression;
-%unignore ModelCache::InsertExprExprConstantExpression;
-%unignore ModelCache::InsertExprExprConstraint;
-%unignore ModelCache::InsertExprExpression;
-%unignore ModelCache::InsertExprExprExpression;
-%unignore ModelCache::InsertVarArrayConstantArrayExpression;
-%unignore ModelCache::InsertVarArrayConstantExpression;
-%unignore ModelCache::InsertVarArrayExpression;
-%unignore ModelCache::InsertVarConstantArrayExpression;
-%unignore ModelCache::InsertVarConstantConstantConstraint;
-%unignore ModelCache::InsertVarConstantConstantExpression;
-%unignore ModelCache::InsertVarConstantConstraint;
-%unignore ModelCache::InsertVoidConstraint;
-
 // ObjectiveMonitor
 %unignore ObjectiveMonitor;
 
@@ -742,12 +748,6 @@ namespace operations_research {
 %ignore PropagationBaseObject::ExecuteAll;
 %ignore PropagationBaseObject::EnqueueAll;
 %ignore PropagationBaseObject::set_action_on_fail;
-
-// PropagationMonitor
-%unignore PropagationMonitor;
-
-// RevPartialSequence
-%unignore RevPartialSequence;
 
 // SearchMonitor
 %feature("director") SearchMonitor;
@@ -781,6 +781,12 @@ namespace operations_research {
 %unignore SearchLog::Maintain;
 %unignore SearchLog::OutputDecision;
 
+// LocalSearchMonitor
+%unignore LocalSearchMonitor;
+
+// PropagationMonitor
+%unignore PropagationMonitor;
+
 // LocalSearchOperator
 %feature("director") LocalSearchOperator;
 %unignore LocalSearchOperator;
@@ -791,6 +797,10 @@ namespace operations_research {
 
 // LocalSearchOperatorState
 %unignore LocalSearchOperatorState;
+
+// LocalSearchPhaseParameters
+%unignore LocalSearchPhaseParameters;
+%rename (GetSolutionPool) LocalSearchPhaseParameters::solution_pool;
 
 // IntVarLocalSearchOperator
 %feature("director") IntVarLocalSearchOperator;
@@ -917,12 +927,6 @@ namespace operations_research {
 %rename (Inhibit) Demon::inhibit;
 %rename (Desinhibit) Demon::desinhibit;
 
-class LocalSearchPhaseParameters {
- public:
-  LocalSearchPhaseParameters();
-  ~LocalSearchPhaseParameters();
-};
-
 }  // namespace operations_research
 
 %define CONVERT_VECTOR(CTYPE, TYPE)
@@ -1007,7 +1011,7 @@ PROTO2_RETURN(operations_research::CpModel,
 
 namespace operations_research {
 // Globals
-// IMPORTANT(user): Global will be placed in ConstraintSolverGlobals.cs
+// IMPORTANT(user): Globals will be placed in ConstraintSolverGlobals.cs
 // Ignored:
 %ignore FillValues;
 }  // namespace operations_research

@@ -112,7 +112,7 @@ class GlobalRefGuard {
     return $null;
   }
 }
-%enddef
+%enddef  // PROTECT_FROM_FAILURE
 
 namespace operations_research {
 PROTECT_FROM_FAILURE(IntExpr::SetValue(int64_t v), arg1->solver());
@@ -135,7 +135,7 @@ PROTECT_FROM_FAILURE(IntervalVar::SetEndMax(int64_t m), arg1->solver());
 PROTECT_FROM_FAILURE(IntervalVar::SetEndRange(int64_t mi, int64_t ma),
                      arg1->solver());
 PROTECT_FROM_FAILURE(IntervalVar::SetPerformed(bool val), arg1->solver());
-PROTECT_FROM_FAILURE(Solver::AddConstraint(Constraint* const c), arg1);
+PROTECT_FROM_FAILURE(Solver::AddConstraint(Constraint* c), arg1);
 PROTECT_FROM_FAILURE(Solver::Fail(), arg1);
 #undef PROTECT_FROM_FAILURE
 }  // namespace operations_research
@@ -160,7 +160,7 @@ class RAIIExceptionChecker {
 %}
 
 // Use to correctly wrap Solver::MakeScheduleOrPostpone.
-%apply int64_t * INOUT { int64_t *const marker };
+%apply int64_t * INOUT { int64_t * marker };
 // Use to correctly wrap arguments otherwise SWIG will wrap them as
 // SWIGTYPE_p_long_long opaque pointer.
 %apply int64_t * OUTPUT { int64_t *l, int64_t *u, int64_t *value };
@@ -1705,6 +1705,7 @@ namespace operations_research {
 %include "ortools/constraint_solver/local_search.h"
 %include "ortools/constraint_solver/search.h"
 %include "ortools/constraint_solver/sequence_var.h"
+%include "ortools/constraint_solver/variables.h"
 
 // Define templates instantiation after wrapping.
 namespace operations_research {
