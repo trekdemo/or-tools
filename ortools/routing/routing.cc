@@ -1094,7 +1094,8 @@ DimensionIndex Model::GetDimensionIndex(
 
 const Dimension& Model::GetDimensionOrDie(
     absl::string_view dimension_name) const {
-  return *dimensions_[gtl::FindOrDie(dimension_name_to_index_, std::string(dimension_name))];
+  return *dimensions_[gtl::FindOrDie(dimension_name_to_index_,
+                                     std::string(dimension_name))];
 }
 
 Dimension* Model::GetMutableDimension(const std::string& dimension_name) const {
